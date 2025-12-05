@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { google } from "googleapis";
 import { cookies } from "next/headers";
 import OpenAI from "openai";
@@ -30,7 +30,13 @@ function decodeBase64(data: string): string {
   }
 }
 
-function extractTextFromParts(parts: any[]): string {
+interface GmailPart {
+  mimeType?: string | null;
+  body?: { data?: string | null } | null;
+  parts?: GmailPart[] | null;
+}
+
+function extractTextFromParts(parts: GmailPart[]): string {
   let text = "";
 
   for (const part of parts) {
@@ -51,7 +57,7 @@ function stripHtml(html: string): string {
     .trim();
 }
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Get tokens from cookie
     const cookieStore = await cookies();
@@ -162,10 +168,11 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({ summaries });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error summarizing emails:", error);
 
-    if (error.code === 401 || error.message?.includes("invalid_grant")) {
+    const err = error as { code?: number; message?: string };
+    if (err.code === 401 || err.message?.includes("invalid_grant")) {
       // Clear the invalid token
       const cookieStore = await cookies();
       cookieStore.delete("gmail_tokens");

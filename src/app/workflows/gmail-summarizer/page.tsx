@@ -56,7 +56,7 @@ function GmailSummarizerContent() {
       } else {
         throw new Error("Failed to get auth URL");
       }
-    } catch (err) {
+    } catch {
       setError("Failed to connect to Gmail. Please try again.");
       setStatus("error");
     }
@@ -79,8 +79,9 @@ function GmailSummarizerContent() {
       const data = await response.json();
       setStatus("done");
       setSummaries(data.summaries);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      setError(errorMessage);
       setStatus("error");
     }
   };
@@ -102,7 +103,7 @@ function GmailSummarizerContent() {
         <div className="bg-zinc-800/50 rounded-xl border border-zinc-700 p-8 text-center">
           <h2 className="text-xl font-semibold mb-4">Step 1: Connect Gmail</h2>
           <p className="text-zinc-400 mb-6">
-            We'll securely connect to your Gmail to read your recent emails.
+            We&apos;ll securely connect to your Gmail to read your recent emails.
             We only read — we never send, delete, or modify anything.
           </p>
           <button
@@ -212,7 +213,7 @@ function GmailSummarizerContent() {
           <div className="text-4xl mb-4">📭</div>
           <h2 className="text-xl font-semibold">No emails found</h2>
           <p className="text-zinc-400 mt-2">
-            Your inbox appears to be empty or we couldn't access your emails.
+            Your inbox appears to be empty or we couldn&apos;t access your emails.
           </p>
         </div>
       )}
